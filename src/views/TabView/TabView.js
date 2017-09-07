@@ -45,7 +45,7 @@ type Props = {
     NavigationState,
     NavigationAction,
     NavigationTabScreenOptions
-  >,
+    >,
   childNavigationProps: {
     [key: string]: NavigationScreenProp<NavigationRoute, NavigationAction>,
   },
@@ -110,22 +110,33 @@ class TabView extends PureComponent<void, Props, void> {
 
   _renderTabBar = (props: *) => {
     const {
-      tabBarOptions,
-      tabBarComponent: TabBarComponent,
       animationEnabled,
+      navigation,
+      router,
+      screenProps,
+      tabBarComponent: TabBarComponent,
+      tabBarOptions,
     } = this.props;
     if (typeof TabBarComponent === 'undefined') {
       return null;
     }
+    const { state } = navigation;
+    const options = router.getScreenOptions(
+      this.props.childNavigationProps[state.routes[state.index].key],
+      screenProps || {}
+    );
+
+    const tabBarVisible = options.tabBarVisible == null ? true : options.tabBarVisible;
     return (
       <TabBarComponent
         {...props}
         {...tabBarOptions}
-        screenProps={this.props.screenProps}
+
         navigation={this.props.navigation}
         getLabel={this._getLabel}
         renderIcon={this._renderIcon}
         animationEnabled={animationEnabled}
+        style={!tabBarVisible && styles.hidden }
       />
     );
   };
@@ -140,23 +151,15 @@ class TabView extends PureComponent<void, Props, void> {
       animationEnabled,
       swipeEnabled,
       lazy,
-      screenProps,
     } = this.props;
 
     let renderHeader;
     let renderFooter;
     let renderPager;
 
-    const { state } = this.props.navigation;
-    const options = router.getScreenOptions(
-      this.props.childNavigationProps[state.routes[state.index].key],
-      screenProps || {}
-    );
 
-    const tabBarVisible =
-      options.tabBarVisible == null ? true : options.tabBarVisible;
 
-    if (tabBarComponent !== undefined && tabBarVisible) {
+    if (tabBarComponent !== undefined) {
       if (tabBarPosition === 'bottom') {
         renderFooter = this._renderTabBar;
       } else {
@@ -196,5 +199,9 @@ const styles = StyleSheet.create({
   page: {
     flex: 1,
     overflow: 'hidden',
+  },
+  hidden: {
+    height: 0,
+    opacity: 0,
   },
 });
