@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   hidden: {
-    height: 0,
-    width: 0,
+    position: "absolute",
+    bottom: -1000,
   },
 });
